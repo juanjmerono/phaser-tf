@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
+</head>
+<body>
+
+    <script>
+    var STAR_START_X = 830;
+    var player;
+    var star;
+    var ground;
+    var gameOver;
+    var config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 200 }
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var game = new Phaser.Game(config);
+    var myPhysics;
+    var startText;
+    var scoreText;
+    var points = 0;
+    var scoredStone = false;
+
+    function preload ()
+    {
+        this.load.setBaseURL('http://labs.phaser.io');
+
+        this.load.image('sky', 'assets/skies/gradient30.png');
+        this.load.image('player', 'assets/sprites/phaser-dude.png');
+        this.load.image('star', 'assets/particles/snowflake.png');
+        this.load.image('ground', 'assets/sprites/stripes800x32-bg.png');
+    }
+
+    function create ()
+    {
+        this.add.image(400, 300, 'sky');
+
+        player = this.physics.add.image(100, 200, 'player');
+        player.setCollideWorldBounds(true);
+
+        star = this.physics.add.sprite(STAR_START_X, getRandomStarY(), 'star');
+        star.body.setAllowGravity(false);
+        star.setVelocityX(-100);
+        star.setScale(0.5);
+        star.setCollideWorldBounds(false);
+
+        ground = this.physics.add.sprite(400,600,'ground');
+        ground.body.setAllowGravity(false);
+
+        this.physics.add.collider(player, ground, killPlayer, null, this);
+        this.physics.add.overlap(player, star, scorePoint, null, this);
+
+        this.input.keyboard.on('keydown',function(event){
+            if (event.key === "ArrowUp") {
+                player.setVelocityY(-230);
+            }
+            if (!gameOver) {
+                startText.setText('');
+                myPhysics.resume();
+            }
+        });
+
+        scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '24px', fill: '#fff' });
+        startText = this.add.text(this.game.config.width/2 - 150, this.game.config.height/2, 'Hit any key to start', { fontSize: '24px', fill: '#fff' });
+
+        this.physics.pause();
+        myPhysics = this.physics;
+
+    }
+
+    function getRandomStarY () {
+        return Math.floor(Math.random() * 530) + 35;
+    }
+
+    function update () {
+        if (gameOver) {
+            return;
+        }
+        if (star.body.x < -100) {
+            scorePoint();
+        }
+    }
+
+    function scorePoint (event) {
+        if (event) { 
+            scoreText.setText('score: '+(++points));
+        }
+        star.setPosition(STAR_START_X, getRandomStarY());
+    }
+
+    function killPlayer () {
+        player.setTint(0xff0000);
+        this.physics.pause();
+        gameOver = true;
+        startText.setText('.... Game over !!');
+    }
+
+    </script>
+
+</body>
+</html>
