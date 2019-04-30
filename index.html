@@ -99,6 +99,16 @@
         }
     }
 
+    function tapOrKey(event){
+        updateScore();
+        if (myPhysics.world.isPaused) {
+            startText.setText('');
+            myPhysics.resume();
+        } else {
+            myPhysics.pause();
+        }
+    }
+
     function create ()
     {
         this.add.image(400, 300, 'sky');
@@ -120,17 +130,10 @@
         this.physics.add.overlap(playerGrp, limitsGrp, killPlayer, null, this);
         this.physics.add.overlap(playerGrp, pipeGrp, killPlayer, null, this);
 
-        this.input.keyboard.on('keydown',function(event){
-            updateScore();
-            if (myPhysics.world.isPaused) {
-                startText.setText('');
-                myPhysics.resume();
-            } else {
-                myPhysics.pause();
-            }
-        });
+        this.input.keyboard.on('keydown',tapOrKey);
+        this.input.on('pointerup',tapOrKey);
 
-        startText = this.add.text(this.game.config.width/2 - 180, this.game.config.height/2 - 20, 'Hit any key to start/stop', { fontSize: '24px', fill: '#fff' });
+        startText = this.add.text(this.game.config.width/2 - 130, this.game.config.height/2 - 35, 'Tap to start/stop', { fontSize: '24px', fill: '#fff' });
 
         this.physics.pause();
         myPhysics = this.physics;
